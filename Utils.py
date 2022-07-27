@@ -207,7 +207,11 @@ def Recenter(x,y,z,cx,cy,cz):
         z[i] = z[i] - cz
     return(x,y,z)
 
-def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem01.nottingham.ac.uk",HPC="Y",QMPACKAGE="QChem"):
+def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem01.nottingham.ac.uk",QMPACKAGE="QChem"):
+    if server != "LOCAL":
+        HPC = "N"
+    else:
+        HPC = "Y"
     if HPC == "Y":
         print("Forming HPC Array JOB")
         with open(work_dir+"array_job.sh",'w') as f:
@@ -265,10 +269,16 @@ def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem
         print("HPC ArrayJob submitted")
         FinishCheck(server,hostdir,work_dir,NumPoints,sp_threads)
     else:
-        print("Starting Calculations locally")
-        line="seq 0 "+str(NumPoints)+" | parallel -j "+str(sp_threads)+ " g16 ./{}/SP.com"
-        os.system(line)
-        print("Single Point Calculations Complete")
+        if QMPACKAGE == "QChem":
+            print("Starting Calculations locally")
+            line=["seq 0 "+str(NumPoints)+" | parallel -j "+str(sp_threads)+ " qchem -nt 1 ./{}/SP.inp"]
+            run = subprocess.run(line, shell=True)
+            print("Single Point Calculations Complete")
+        elif QMPACKAGE == "GAUSSIAN":
+            print("Starting Calculations locally")
+            line=["seq 0 "+str(NumPoints)+" | parallel -j "+str(sp_threads)+ " g16 ./{}/SP.inp"]
+            run = subprocess.run(line, shell=True)
+            print("Single Point Calculations Complete")
 
 def average(lst):
     if len(lst)==0:
@@ -337,6 +347,7 @@ def GenSP(opt_sys_at, opt_sys_x, opt_sys_y, opt_sys_z, work_dir, point_charge_va
         pc = str(cp[i]) + " " + str(point_charge_value)
         nc = str(cn[i]) + " -" + str(point_charge_value)
         if QMPACKAGE == "Gaussian":
+            print("Dispersion not implemented in Gaussian")
             sp_file = str(directory) + "/SP.com"
             with open(sp_file,'w') as f:
                 print("%mem=" + str(sp_memory) + "GB", file=f)
