@@ -1,6 +1,18 @@
 # Welcome to the Spherical charge electric field script
 
+## Install and general information:
+
 Install Jupyter Notebook if you havent already
 Code is dependant on conda packages: numpy, plotly, dash, os, subprocess, time, tqdm.
 
 For cluster/server calculations, passwordless SSH is required so that python can communicate with the slurm submit node.
+
+If on the University of Nottingham network, a version of the visualization may be running on duip76109.nottingham.ac.uk:8050 however this is not always true.
+
+### Usage:
+
+1. Create a working directory on your local machine and your server
+2. Place your coordinate file (.xyz) in your working directory and decide on how it should be centered.
+3. Open the Jupyter Notebook called "Spherical.ipynb" and set all variables/parameters
+4. Run the full script using the run all command
+5. Load up the visualization using the links printed
