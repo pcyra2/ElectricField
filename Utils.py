@@ -171,7 +171,7 @@ def CoordGet(work_dir, file):
     return (at, x, y, z)
 
 def CoordCheck(at,x,y,z,recenter,center_type,data):
-    print(x)
+    # print(x)
     x_center = average(x)
     y_center = average(y)
     z_center = average(z)
@@ -209,9 +209,9 @@ def Recenter(x,y,z,cx,cy,cz):
 
 def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem01.nottingham.ac.uk",QMPACKAGE="QChem"):
     if server != "LOCAL":
-        HPC = "N"
-    else:
         HPC = "Y"
+    else:
+        HPC = "N"
     if HPC == "Y":
         print("Forming HPC Array JOB")
         with open(work_dir+"array_job.sh",'w') as f:
@@ -262,7 +262,7 @@ def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem
                 print("echo $CAL000", file=f)
             with open(work_dir + "jobs.tmp", 'w') as f:
                 for i in range(0,NumPoints):
-                    text = "cd ./" + str(i) + " ; qchem -nt " + str(sp_threads) + " SP.inp SP.out"
+                    text = "cd ./" + str(i) + " ; qchem -nt " + str(sp_threads) + " SP.inp SP.out ; echo \"slurm_done\""
                     print(str(text), file=f)
         print("Submitting HPC ARRAY JOB")
         Submit(server,hostdir,work_dir)
@@ -271,7 +271,7 @@ def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem
     else:
         if QMPACKAGE == "QChem":
             print("Starting Calculations locally")
-            line=["seq 0 "+str(NumPoints)+" | parallel -j "+str(sp_threads)+ " qchem -nt 1 ./{}/SP.inp"]
+            line=["module load qchem ; seq 0 "+str(NumPoints)+" | parallel -j "+str(sp_threads)+ " qchem -nt 1 ./{}/SP.inp"]
             run = subprocess.run(line, shell=True)
             print("Single Point Calculations Complete")
         elif QMPACKAGE == "GAUSSIAN":
@@ -289,8 +289,13 @@ def average(lst):
 def FormatCoord(at, x, y, z,work_dir,file="coords_formatted.txt"):
     newat = []
     for i in range(len(at)):
+        match = False
         for j in range(len(Symbol)):
-            if at[i] == Symbol[j]: newat.append(str(j))
+            if at[i] == Symbol[j]:
+                newat.append(str(j))
+                match = True
+        # print(i, match)
+    # print(len(newat))
     with open(work_dir+file,'w') as f:
         for i in range(len(at)):
             print(str(x[i])+"\t"+str(y[i])+"\t"+str(z[i])+"\t"+str(newat[i]),file=f)
@@ -426,13 +431,14 @@ def FinishCheck(hostname,hostdir,workdir,njobs,threads):
         print("Rsync done")
         # slurmcheck = subprocess.Popen(['ls '+workdir+'slurm*'],stdout=PIPE, stderr=PIPE, stdin=PIPE,shell=True)#.communicate()[0]
         # slurmcheck.wait()
-        slurmcheck = subprocess.run(['ls '+ workdir+'slurm*'], shell=True, text=True, capture_output = True)
+        # slurmcheck = subprocess.run(['ls '+ workdir+'slurm*'], shell=True, text=True, capture_output = True)
+        slurmcheck = subprocess.run(['grep \"slurm_done\" '+workdir+"*.out"], shell = True, text = True, capture_output = True)
         print("Counting slurm files")
         # slurmcheck = slurmcheck.communicate()[0]
         # print(slurmcheck.stdout.split("\n"))
         slurms = slurmcheck.stdout.split("\n")
-        print("Number of jobs started = "+str(len(slurms)-2)+" out of "+str(njobs))
-        if len(slurms) < njobs+1:
+        print("Number of jobs finished = "+str(len(slurms)-1)+" out of "+str(njobs))
+        if len(slurms) < njobs:
             print("Waiting for jobs to run")
             time.sleep(120)
         else:
