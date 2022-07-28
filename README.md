@@ -16,3 +16,18 @@ If on the University of Nottingham network, a version of the visualization may b
 3. Open the Jupyter Notebook called "Spherical.ipynb" and set all variables/parameters
 4. Run the full script using the run all command
 5. Load up the visualization using the links printed
+
+
+### Running Jupyter notebook via ssh:
+
+Create a ssh tunnel to the port 8080 on the machine 
+
+{ssh -N -L 8080:localhost:8080 XXX@YYYY.nottingham.ac.uk}
+
+
+In a new terminal, run jupyter notebook from the folder containing the notebook
+
+{jupyter notebook --no-browser --port=8080}
+
+
+On your browser on your local machine, connect to the 
