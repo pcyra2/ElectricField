@@ -357,7 +357,7 @@ def GenSP(opt_sys_at, opt_sys_x, opt_sys_y, opt_sys_z, work_dir, point_charge_va
             with open(sp_file,'w') as f:
                 print("%mem=" + str(sp_memory) + "GB", file=f)
                 print("%nprocshared=" + str(sp_threads), file=f)
-                print(" #p OPT " + str(sp_method + "/" + str(sp_basis)), file=f)
+                print(" #p " + str(sp_method + "/" + str(sp_basis)), file=f)
                 print("", file=f)
                 print(str(i) + " opt", file=f)
                 print("", file=f)
