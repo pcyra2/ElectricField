@@ -68,9 +68,9 @@ Symbol = ["X",  "H",  "He", "Li", "Be", "B",  "C",  "N",  "O",  "F",  "Ne", "Na"
           "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg"]
 
 Symb2Mass = dict(zip(Symbol,Mass))
-Atno2Mass = dict(zip(list(range(11)),Mass))
-Atno2Symb = dict(zip(list(range(11)),Symbol))
-Symb2Atno = dict(zip(Symbol,list(range(11))))
+Atno2Mass = dict(zip(list(range(104)),Mass))
+Atno2Symb = dict(zip(list(range(104)),Symbol))
+Symb2Atno = dict(zip(Symbol,list(range(104))))
 
 
 AtomColours = {"H" : ["rgba(255, 255, 255, 1.0)", 1],
@@ -269,15 +269,18 @@ def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem
         print("HPC ArrayJob submitted")
         FinishCheck(server,hostdir,work_dir,NumPoints,sp_threads)
     else:
+        my_env = os.environ.copy()
+        my_env["PATH"] = "/usr/sbin:/sbin:" + my_env["PATH"]
+        print(my_env)
         if QMPACKAGE == "QChem":
             print("Starting Calculations locally")
-            line=["module load qchem ; seq 0 "+str(NumPoints)+" | parallel -j "+str(sp_threads)+ " qchem -nt 1 ./{}/SP.inp"]
-            run = subprocess.run(line, shell=True)
+            line=["seq 0 "+str(NumPoints)+" | parallel -j "+str(sp_threads)+ " qchem -nt 1 "+str(work_dir)+"{}/SP.inp "+str(work_dir)+"{}/SP.out"]
+            run = subprocess.run(line, shell=True,env=my_env)
             print("Single Point Calculations Complete")
         elif QMPACKAGE == "GAUSSIAN":
             print("Starting Calculations locally")
             line=["seq 0 "+str(NumPoints)+" | parallel -j "+str(sp_threads)+ " g16 "+str(work_dir)+"{}/SP.com"]
-            run = subprocess.run(line, shell=True)
+            run = subprocess.run(line, shell=True,env=my_env)
             print("Single Point Calculations Complete")
 
 def average(lst):
@@ -349,17 +352,17 @@ def GenSP(opt_sys_at, opt_sys_x, opt_sys_y, opt_sys_z, work_dir, point_charge_va
             os.mkdir(directory)
         except FileExistsError:
             print("directory "+ str(i) + " already exists")
-        pc = str(cp[i]) + " " + str(point_charge_value)
-        nc = str(cn[i]) + " -" + str(point_charge_value)
+        pc = str(cp[i]) + " " + str(point_charge_value)+".00"
+        nc = str(cn[i]) + " -" + str(point_charge_value)+".00"
         if QMPACKAGE == "GAUSSIAN":
             print("Dispersion not implemented in Gaussian")
             sp_file = str(directory) + "/SP.com"
             with open(sp_file,'w') as f:
                 print("%mem=" + str(sp_memory) + "GB", file=f)
                 print("%nprocshared=" + str(sp_threads), file=f)
-                print(" #p " + str(sp_method + "/" + str(sp_basis)), file=f)
+                print(" #p Charge NoSymm " + str(sp_method + "/" + str(sp_basis)), file=f)
                 print("", file=f)
-                print(str(i) + " opt", file=f)
+                print(str(inp) + " opt", file=f)
                 print("", file=f)
                 print(str(sys_charge) + " " + str(sys_spin), file=f)
                 for j in range(len(opt_sys_at)):
