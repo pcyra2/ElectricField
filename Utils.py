@@ -276,7 +276,7 @@ def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem
             print("Single Point Calculations Complete")
         elif QMPACKAGE == "GAUSSIAN":
             print("Starting Calculations locally")
-            line=["seq 0 "+str(NumPoints)+" | parallel -j "+str(sp_threads)+ " g16 ./{}/SP.inp"]
+            line=["seq 0 "+str(NumPoints)+" | parallel -j "+str(sp_threads)+ " g16 "+str(work_dir)+"{}/SP.com"]
             run = subprocess.run(line, shell=True)
             print("Single Point Calculations Complete")
 
@@ -351,7 +351,7 @@ def GenSP(opt_sys_at, opt_sys_x, opt_sys_y, opt_sys_z, work_dir, point_charge_va
             print("directory "+ str(i) + " already exists")
         pc = str(cp[i]) + " " + str(point_charge_value)
         nc = str(cn[i]) + " -" + str(point_charge_value)
-        if QMPACKAGE == "Gaussian":
+        if QMPACKAGE == "GAUSSIAN":
             print("Dispersion not implemented in Gaussian")
             sp_file = str(directory) + "/SP.com"
             with open(sp_file,'w') as f:
@@ -359,7 +359,7 @@ def GenSP(opt_sys_at, opt_sys_x, opt_sys_y, opt_sys_z, work_dir, point_charge_va
                 print("%nprocshared=" + str(sp_threads), file=f)
                 print(" #p OPT " + str(sp_method + "/" + str(sp_basis)), file=f)
                 print("", file=f)
-                print(str(inp) + " opt", file=f)
+                print(str(i) + " opt", file=f)
                 print("", file=f)
                 print(str(sys_charge) + " " + str(sys_spin), file=f)
                 for j in range(len(opt_sys_at)):
