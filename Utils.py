@@ -759,3 +759,4 @@ def DrawMolecule(MolData,txture,style):
     Molecule['bond_list'] = GetBonds(Molecule['geometry'],Molecule['symbols'],Molecule['bonds'],style,txture)
     Molecule['atom_list'] = GetAtoms(Molecule['geometry'],Molecule['atomic_numbers'],Molecule['symbols'],style,txture)
     return Molecule
+
