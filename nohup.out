@@ -1,0 +1,9 @@
+[I 12:13:13.729 NotebookApp] Serving notebooks from local directory: /home/pcyra2/PycharmProjects/ElectricField
+[I 12:13:13.729 NotebookApp] Jupyter Notebook 6.4.12 is running at:
+[I 12:13:13.729 NotebookApp] http://localhost:8080/
+[I 12:13:13.729 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[I 12:13:34.803 NotebookApp] 302 GET / (127.0.0.1) 0.490000ms
+[I 12:13:43.130 NotebookApp] Kernel started: 207c6af0-d1aa-42be-8d90-e52bdaa10abb, name: python3
+[IPKernelApp] ERROR | No such comm target registered: jupyter.widget.control
+[IPKernelApp] WARNING | No such comm: ffeaa7da-7945-497b-b3fb-b3bcb30cd739
+[I 12:15:43.113 NotebookApp] Saving file at /Spherical.ipynb
