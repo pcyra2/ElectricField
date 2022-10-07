@@ -1,4 +1,5 @@
 import numpy as numpy
+from numpy import linalg as LA
 import plotly.graph_objects as go
 import os
 import subprocess
@@ -577,6 +578,42 @@ def GenColors(x_sphere, y_sphere, z_sphere,x_data, y_data, z_data, en_data,radiu
             col[i,j] = top/bottom
     print("Coloring done")
     return (col,cX,cY,cZ,contVal)
+
+def GenColorsFaster(x_sphere, y_sphere, z_sphere,x_data, y_data, z_data, en_data,radius):
+    ### Generate array for colors
+    col = numpy.zeros([len(x_sphere[:,1]),len(x_sphere[1])])
+    ### Populate array of colors
+    cX,cY,cZ,contVal=[],[],[],[]
+    iso_values = set(numpy.around(numpy.arange(round(numpy.max(en_data),3),round(numpy.min(en_data),3),-0.001),4))
+    # print(round(numpy.min(en_data),3),round(numpy.max(en_data),3))
+    # print(iso_values)
+    # for i in range(len(x_sphere[:,1])):
+    for i in tqdm_notebook(range(len(x_sphere[:,1])), desc="Color progress"):
+        # print("Color: "+str(i/len(x_sphere[:,1])*100)+"%")
+        for j in tqdm_notebook(range(len(y_sphere[1])),desc="Step "+ str(i) + " progress", leave = False):
+            top = 0
+            bottom = 0
+            dx = (x_sphere[i, j] * radius) * numpy.asarray(x_data)
+            dy = (y_sphere[i, j] * radius) * numpy.asarray(y_data)
+            dz = (z_sphere[i, j] * radius) * numpy.asarray(z_data)
+            dP = numpy.arccos((dx + dy + dz) / (numpy.power(radius, 2))) * radius
+            dpE = numpy.exp(-numpy.power(dP,2))
+            top = numpy.dot(dpE, numpy.asarray(en_data))
+            bottom = numpy.sum(dpE)
+            # print(top, bottom)
+            cVal = round(top/bottom,4)
+            # print(cVal)
+            # for k in numpy.arange(round(numpy.min(en_data),3),round(numpy.max(en_data),3)-0.001):
+            if cVal in iso_values:
+                cX.append(x_sphere[i,j] * radius)
+                cY.append(y_sphere[i,j] * radius)
+                cZ.append(z_sphere[i,j] * radius)
+                contVal.append((round(cVal,4)+456.080)*627.5)
+                # print((round(cVal,4)+456.080)*627.5)
+            col[i,j] = top/bottom
+    print("Coloring done")
+    return (col,cX,cY,cZ,contVal)
+
 
 def GetRange(min_range, max_range, overage=2.5):
     axis = {'autorange': False,
