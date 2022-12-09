@@ -23,6 +23,7 @@ import argparse
 # display(HTML(""))
 parser = argparse.ArgumentParser()
 parser.add_argument('-p','--port', type=int, help = "The port number to run the web server.")
+parser.add_argument('-w', '--wait', type=int, help = "The length of time to wait between rsync commands whilst waiting to check for calculation completion")
 args = parser.parse_args()
 
 
@@ -408,6 +409,11 @@ def Calculate_Data(nclicks, work_dir, start_coordinate, qm_functional, qm_basis_
         calculate_data = True
         run_clean = True
         center_info=[]
+        if args.wait != None:
+            wait_time = args.wait
+        else:
+            wait_time = 120
+        print(wait_time)
         random=True ### For future implementation of systematic datapoints.
         if calculate_data == True:
             if run_clean == True:
@@ -432,7 +438,7 @@ def Calculate_Data(nclicks, work_dir, start_coordinate, qm_functional, qm_basis_
                         mem, threads, str(qm_functional), str(qm_basis_set), system_charge,
                         system_spin, str(qm_dispersion), str(qm_package))
             Utils.SPRun(str(work_dir), mem, threads, spherical_datapoints,
-                        str(host_work_dir), str(server), str(qm_package))
+                        str(host_work_dir), str(server), str(qm_package), int(wait_time))
         else:
             print("Data should already be calculated.")
         return "Calculation Complete"

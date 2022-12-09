@@ -225,7 +225,7 @@ def Recenter(x,y,z,cx,cy,cz):
         z[i] = z[i] - cz
     return(x,y,z)
 
-def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem01.nottingham.ac.uk",QMPACKAGE="QChem"):
+def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem01.nottingham.ac.uk",QMPACKAGE="QChem", wait_time=120):
     if server != "LOCAL":
         HPC = "Y"
     else:
@@ -294,7 +294,7 @@ def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem
         print("Submitting HPC ARRAY JOB")
         Submit(server,hostdir,work_dir)
         print("HPC ArrayJob submitted")
-        FinishCheck(server,hostdir,work_dir,NumPoints,sp_threads)
+        FinishCheck(server,hostdir,work_dir,NumPoints,sp_threads, wait_time)
     else:
         my_env = os.environ.copy()
         my_env["PATH"] = "/usr/sbin:/sbin:" + my_env["PATH"]
@@ -446,7 +446,7 @@ def Submit(hostname,hostdir,workdir):
     pid = status[3]
     print("job id = "+pid)
 
-def FinishCheck(hostname,hostdir,workdir,njobs,threads):
+def FinishCheck(hostname,hostdir,workdir,njobs,threads, wait_time):
     print("Waiting for calculations to be completed")
     done = False
     counter=0
@@ -470,7 +470,7 @@ def FinishCheck(hostname,hostdir,workdir,njobs,threads):
         print("Number of jobs finished = "+str(len(slurms)-1)+" out of "+str(njobs))
         if len(slurms) < njobs:
             print("Waiting for jobs to run")
-            time.sleep(120)
+            time.sleep(wait_time)
         else:
             try:
                 failed = OutputExtract(workdir,njobs,threads)
