@@ -13,7 +13,7 @@ import time
 import Utils ### Custom function scripts, Thanks to Tom Irons of the Teale group (UoN School of Chemistry) for molecule generation code. 19/7/22 ###
 from collections import OrderedDict
 import multiprocessing
-import pandas as pd
+# import pandas as pd
 from IPython.display import display, HTML
 import json
 import webbrowser
@@ -645,11 +645,11 @@ def Visualise_Interp(n_clicks,alphval,interp,texture,draw_type,work_dir,radius,c
         return go.Figure(layout=go.Layout(title="Visualisation", uirevision='camera'))
 
 def Open_Browser():
-    webbrowser.open("0.0.0.0:8050")
+    webbrowser.open("127.0.0.1:8050")
 
 
 if __name__ == '__main__':
     Timer(1, Open_Browser).start();
-    app.run_server(debug=True, use_reloader=False, host='0.0.0.0', )
+    app.run_server(debug=True, use_reloader=False,)# host='0.0.0.0', )
 
 
