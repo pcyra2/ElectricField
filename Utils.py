@@ -23,7 +23,6 @@ def init_modules():
              'gaussian' : str(words[2]),
              'scratch' : str(words[3]),
              'partition' : str(words[4])}})
-    print(modules)
     return modules
 
 modules = init_modules()
