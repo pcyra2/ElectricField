@@ -2,15 +2,16 @@
 
 ## Install & Configure:
 1. Download source files from GIT
-2. Configure conda environment using:
+2. Configure conda environment using: \
   conda env create -f CondaEnv.yml
-3. Activate conda environment using:
+3. Activate conda environment using: \
   conda activate ElectricField
 4. Edit the server.config file if not using UoN clusters.
 
 ## Run single calculation
-1. Run script using:
-  python SphericalWebSRV.py 
+1. Run script using: \
+  python SphericalWebSRV.py \
+   (If on mac, also open a browser window and type 127.0.0.1:8050)
 2. Edit user variables
 3. Run Calculation
 4. Run Interpolation
