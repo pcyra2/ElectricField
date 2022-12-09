@@ -18,7 +18,13 @@ from IPython.display import display, HTML
 import json
 import webbrowser
 from threading import Timer
-display(HTML(""))
+import argparse
+
+# display(HTML(""))
+parser = argparse.ArgumentParser()
+parser.add_argument('-p','--port', type=int, help = "The port number to run the web server.")
+args = parser.parse_args()
+
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX])
 app.layout = html.Div([
@@ -645,11 +651,15 @@ def Visualise_Interp(n_clicks,alphval,interp,texture,draw_type,work_dir,radius,c
         return go.Figure(layout=go.Layout(title="Visualisation", uirevision='camera'))
 
 def Open_Browser():
-    webbrowser.open("127.0.0.1:8050")
+    webbrowser.open("127.0.0.1:"+str(port))
 
+if args.port == None:
+    port = 8050
+else:
+    port = args.port
 
 if __name__ == '__main__':
     Timer(1, Open_Browser).start();
-    app.run_server(debug=True, use_reloader=False,)# host='0.0.0.0', )
+    app.run_server(debug=True, use_reloader=False, port=port)# host='0.0.0.0', )
 
 
