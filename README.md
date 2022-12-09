@@ -1,5 +1,33 @@
 # Welcome to the Spherical charge electric field script
 
+## Install & Configure:
+1. Download source files from GIT
+2. Configure conda environment using:
+  conda env create -f CondaEnv.yml
+3. Activate conda environment using:
+  conda activate ElectricField
+4. Edit the server.config file if not using UoN clusters.
+
+## Run single calculation
+1. Run script using:
+  python SphericalWebSRV.py 
+2. Edit user variables
+3. Run Calculation
+4. Run Interpolation
+5. Run Visualisation
+
+## Run comparison
+1. Ensure single calculations are run on both systems to be compared
+2. Ensure the same charge points are used (ChargeP and ChargeN)
+3. Set DATASET1 as the folder with coordinates to be visualised and initial charge data
+4. Set DATASET2 as the folder with the comparison charge data
+5. Set SAVE LOCATION as the folder to save interpolation cache file. (Usually the parent directory)
+6. Run Visualisation (uses the same visualisation parameters from initial visualisation)
+
+
+
+# *** Jupyter version now depreciated ***
+
 ## Install and general information:
 
 Install Jupyter Notebook if you havent already
