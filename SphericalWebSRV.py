@@ -464,6 +464,10 @@ def Interpolate_Data(nclicks, work_dir, file, resolution, radius, save):
                     "y_sphere" : y_sphere.tolist(),
                     "z_sphere" : z_sphere.tolist(),
                     "col_sphere" : col_sphere.tolist(),
+                    "x_contour" : x_contour,
+                    "y_contour" : y_contour,
+                    "z_contour" : z_contour,
+                    "val_contour" : val_contour,
                     }
             # with open(str(work_dir)+"interpolation.dict", 'w') as file:
             #     print(data, file=file)
@@ -514,6 +518,10 @@ def Compare_Data(nclicks, work_dir1, work_dir2, resolution, radius, save, save_l
                     "y_sphere" : y_sphere.tolist(),
                     "z_sphere" : z_sphere.tolist(),
                     "col_sphere" : col_sphere.tolist(),
+                    "x_contour" : x_contour,
+                    "y_contour" : y_contour,
+                    "z_contour" : z_contour,
+                    "val_contour" : val_contour,
                     }
             # with open(str(work_dir)+"interpolation.dict", 'w') as file:
             #     print(data, file=file)
@@ -540,6 +548,10 @@ def Visualise_Data(n_clicks,alphval,interp,texture,draw_type,work_dir,radius):
         y_sphere = numpy.array(sphdat["y_sphere"])
         z_sphere = numpy.array(sphdat["z_sphere"])
         col_sphere = numpy.array(sphdat["col_sphere"])
+        x_contour = sphdat["x_contour"]
+        y_contour = sphdat["y_contour"]
+        z_contour = sphdat["z_contour"]
+        val_contour = sphdat["val_contour"]
         (x_data, y_data, z_data, en_data) = Utils.EnergyExtract(str(work_dir),
                                                                 energies_filename)
         Fig = go.Figure(layout=go.Layout(title="Visualisation", uirevision='camera'))
@@ -560,10 +572,10 @@ def Visualise_Data(n_clicks,alphval,interp,texture,draw_type,work_dir,radius):
         Energies = go.Scatter3d(x=x_data, y=y_data, z=z_data, mode='markers',
                                 marker=dict(size=5, color=en_data,
                                             colorscale='Turbo', opacity=1))
-        # Contours = go.Scatter3d(x=x_contour, y=y_contour, z=z_contour,
-        #                         mode='markers',
-        #                         marker=dict(size=3, color='black'),
-        #                         hovertext=val_contour)
+        Contours = go.Scatter3d(x=x_contour, y=y_contour, z=z_contour,
+                                mode='markers',
+                                marker=dict(size=3, color='black'),
+                                hovertext=val_contour)
         Fig.add_trace(Energies)
         if interp == "Sphere" or "Contours": Fig.add_trace(Sphere)
         if interp == "Contours":  Fig.add_trace(Contours)
@@ -596,6 +608,10 @@ def Visualise_Interp(n_clicks,alphval,interp,texture,draw_type,work_dir,radius,c
         y_sphere = numpy.array(sphdat["y_sphere"])
         z_sphere = numpy.array(sphdat["z_sphere"])
         col_sphere = numpy.array(sphdat["col_sphere"])
+        x_contour = sphdat["x_contour"]
+        y_contour = sphdat["y_contour"]
+        z_contour = sphdat["z_contour"]
+        val_contour = sphdat["val_contour"]
         (x_data, y_data, z_data, en_data) = Utils.EnergyExtract(str(work_dir),
                                                                 energies_filename)
         Fig = go.Figure(layout=go.Layout(title="Visualisation", uirevision='camera'))
