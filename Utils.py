@@ -5,7 +5,8 @@ import os
 import subprocess
 # from subprocess import DEVNULL, STDOUT, PIPE, Popen
 import time
-from tqdm import tnrange, tqdm_notebook
+from tqdm import tnrange, tqdm_notebook, tqdm
+import glob
 
 Ang2Bohr = 1.889725989
 Bohr2Ang = 0.529177249
@@ -219,7 +220,7 @@ def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem
             print("#!/bin/bash",file=f)
             print("RUNLINE=$(cat $ARRAY_TASKFILE | head -n $SLURM_ARRAY_TASK_ID | tail -n 1)",file=f)
             print("eval $RUNLINE",file=f)
-        if QMPACKAGE == "GAUSSIAN":
+        if QMPACKAGE == "Gaussian":
             if server == "loginchem01.nottingham.ac.uk":
                 print("This cluster does not currently have gaussian installed")
                 return ValueError
@@ -278,7 +279,7 @@ def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem
             line=["seq 0 "+str(NumPoints)+" | parallel -j "+str(sp_threads)+ " qchem -nt 1 "+str(work_dir)+"{}/SP.inp "+str(work_dir)+"{}/SP.out"]
             run = subprocess.run(line, shell=True,env=my_env)
             print("Single Point Calculations Complete")
-        elif QMPACKAGE == "GAUSSIAN":
+        elif QMPACKAGE == "Gaussian":
             print("Starting Calculations locally")
             line=["seq 0 "+str(NumPoints)+" | parallel -j "+str(sp_threads)+ " g16 "+str(work_dir)+"{}/SP.com"]
             run = subprocess.run(line, shell=True,env=my_env)
@@ -553,9 +554,11 @@ def GenColors(x_sphere, y_sphere, z_sphere,x_data, y_data, z_data, en_data,radiu
     # print(round(numpy.min(en_data),3),round(numpy.max(en_data),3))
     # print(iso_values)
     # for i in range(len(x_sphere[:,1])):
-    for i in tqdm_notebook(range(len(x_sphere[:,1])), desc="Color progress"):
+    # for i in tqdm_notebook(range(len(x_sphere[:,1])), desc="Color progress"):
+    for i in tqdm(range(len(x_sphere[:,1])), desc="Color progress"):
         # print("Color: "+str(i/len(x_sphere[:,1])*100)+"%")
-        for j in tqdm_notebook(range(len(y_sphere[1])),desc="Step "+ str(i) + " progress", leave = False):
+        # for j in tqdm_notebook(range(len(y_sphere[1])),desc="Step "+ str(i) + " progress", leave = False):
+        for j in tqdm(range(len(y_sphere[1])),desc="Step "+ str(i) + " progress", leave = False):
             top = 0
             bottom = 0
             for k in range(len(x_data)):
@@ -588,9 +591,11 @@ def GenColorsFaster(x_sphere, y_sphere, z_sphere,x_data, y_data, z_data, en_data
     # print(round(numpy.min(en_data),3),round(numpy.max(en_data),3))
     # print(iso_values)
     # for i in range(len(x_sphere[:,1])):
-    for i in tqdm_notebook(range(len(x_sphere[:,1])), desc="Color progress"):
+    # for i in tqdm_notebook(range(len(x_sphere[:,1])), desc="Color progress"):
+    for i in tqdm(range(len(x_sphere[:,1])), desc="Color progress"):
         # print("Color: "+str(i/len(x_sphere[:,1])*100)+"%")
-        for j in tqdm_notebook(range(len(y_sphere[1])),desc="Step "+ str(i) + " progress", leave = False):
+        # for j in tqdm_notebook(range(len(y_sphere[1])),desc="Step "+ str(i) + " progress", leave = False):
+        for j in tqdm(range(len(y_sphere[1])),desc="Step "+ str(i) + " progress", leave = False):
             top = 0
             bottom = 0
             dx = (x_sphere[i, j] * radius) * numpy.asarray(x_data)
@@ -797,3 +802,21 @@ def DrawMolecule(MolData,txture,style):
     Molecule['atom_list'] = GetAtoms(Molecule['geometry'],Molecule['atomic_numbers'],Molecule['symbols'],style,txture)
     return Molecule
 
+def RunClean(work_dir, SRV, SRV_dir):
+    print("Cleaning "+str(work_dir)+"Excluding .xyz files")
+    # home = subprocess.run(["cd "+str(work_dir)+" ; rm -rv !(*.xyz)"],capture_output=True, text=True, )
+    # home = subprocess.run(['rm -rv ' + str(work_dir)+'!(*.xyz)'],capture_output=True, text=True, shell=True)
+    # print(home)
+    files = glob.glob(str(work_dir)+"*", recursive=True)
+    for i in files:
+        if ".xyz" not in i:
+            # print(i)
+            os.system("rm -r "+i)
+    if SRV != "LOCAL":
+        print("Cleaning "+str(SRV_dir)+ " on "+str(SRV))
+        srv = subprocess.run(['ssh', SRV, 'rm -r ', str(SRV_dir)], capture_output = True, text = True, check=True)
+        srv = subprocess.run(['ssh', SRV, 'mkdir ', str(SRV_dir)], capture_output = True, text = True, check=True)
+
+def CompareEnergies(x_data, y_data, z_data, en_data1, en_data2, x_sphere, y_sphere, z_sphere, radius):
+    delta = en_data2 - en_data1
+    GenColorsFaster(x_sphere,y_sphere,z_sphere,x_data,y_data,z_data,delta,radius)
