@@ -12,6 +12,23 @@ Ang2Bohr = 1.889725989
 Bohr2Ang = 0.529177249
 Amu2SiKg = 1.660539040e-27
 
+def init_modules():
+    with open("servers.conf", "r") as file:
+        data = file.readlines()
+    modules = {}
+    for i in range(1,len(data)):
+        words = data[i].split()
+        modules.update({str(words[0]) :
+            {'qchem' : str(words[1]),
+             'gaussian' : str(words[2]),
+             'scratch' : str(words[3]),
+             'partition' : str(words[4])}})
+    print(modules)
+    return modules
+
+modules = init_modules()
+
+
 Gaussian_module = "gaussian-uon/avx2/g16"
 QChem_HPC_module = "qchem-uon/foss-2020a/5.3"
 QChem_CHEM_module = "qchem/qchem-5.4.2-openmp"
@@ -216,18 +233,24 @@ def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem
         HPC = "N"
     if HPC == "Y":
         print("Forming HPC Array JOB")
+        mods = modules[str(server)]
         with open(work_dir+"array_job.sh",'w') as f:
             print("#!/bin/bash",file=f)
             print("RUNLINE=$(cat $ARRAY_TASKFILE | head -n $SLURM_ARRAY_TASK_ID | tail -n 1)",file=f)
             print("eval $RUNLINE",file=f)
+            scratch_loc = mods["scratch"]
+            partition = mods["partition"]
         if QMPACKAGE == "Gaussian":
-            if server == "loginchem01.nottingham.ac.uk":
-                print("This cluster does not currently have gaussian installed")
+            # if server == "loginchem01.nottingham.ac.uk":
+            #     print("This cluster does not currently have gaussian installed")
+            #     return ValueError
+            # elif server == "login001.augusta.nottingham.ac.uk":
+            #     module_file = mods["gaussian"]
+            #     scratch_loc = "~/SCRATCH"
+            #     partition = "defq"
+            module_file = mods["gaussian"]
+            if module_file == "NONE":
                 return ValueError
-            elif server == "login001.augusta.nottingham.ac.uk":
-                module_file = Gaussian_module
-                scratch_loc = "~/SCRATCH"
-                partition = "defq"
             with open(work_dir+"sub.sh",'w') as f:
                 print("#!/bin/bash",file=f)
                 print("export ARRAY_JOBFILE=array_job.sh",file=f)
@@ -235,21 +258,24 @@ def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem
                 print("export ARRAY_NTASKS=$(cat $ARRAY_TASKFILE | wc -l)",file=f)
                 print("module load "+str(module_file),file=f)
                 print("export "+str(scratch_loc),file=f)
-                print("CAL000=$(sbatch -J \"SinglePoint\" --mem="+str(sp_memory)+"G --nodes=1 --cpus-per-task="+str(sp_threads) +" -p \"defq\" -t 20 --get-user-env --parsable --array=1-$ARRAY_NTASKS $ARRAY_JOBFILE)",file=f)
+                print("CAL000=$(sbatch -J \"SinglePoint\" --mem="+str(sp_memory)+"G --nodes=1 --cpus-per-task="+str(sp_threads) +" -p \""+str(partition) +"\" -t 20 --get-user-env --parsable --array=1-$ARRAY_NTASKS $ARRAY_JOBFILE)",file=f)
                 print("echo $CAL000",file=f)
             with open(work_dir+"jobs.tmp",'w') as f:
                 for i in range(0,NumPoints):
                     text = "cd ./"+str(i)+" ; g16 SP.com"
                     print(str(text),file=f)
         if QMPACKAGE == "QChem":
-            if server == "loginchem01.nottingham.ac.uk":
-                module_file = QChem_CHEM_module
-                scratch_loc = "~/PERSONAL_SCRATCH"
-                partition = "dumbledore"
-            elif server == "login001.augusta.nottingham.ac.uk":
-                module_file = QChem_HPC_module
-                scratch_loc = "~/SCRATCH"
-                partition = "defq"
+            # if server == "loginchem01.nottingham.ac.uk":
+            #     module_file = QChem_CHEM_module
+            #     scratch_loc = "~/PERSONAL_SCRATCH"
+            #     partition = "dumbledore"
+            # elif server == "login001.augusta.nottingham.ac.uk":
+            #     module_file = QChem_HPC_module
+            #     scratch_loc = "~/SCRATCH"
+            #     partition = "defq"
+            module_file = mods["qchem"]
+            if module_file == "NONE":
+                return ValueError
             with open(work_dir + "sub.sh", 'w') as f:
                 print("#!/bin/bash", file=f)
                 print("export ARRAY_JOBFILE=array_job.sh", file=f)
@@ -259,7 +285,7 @@ def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem
                 print("export QCSCRATCH=" + str(scratch_loc), file=f)
                 print("CAL000=$(sbatch -J \"SinglePoint\" --mem=" + str(
                     sp_memory) + "G --nodes=1 --cpus-per-task=" + str(
-                    sp_threads) + " -p \""+partition+"\" -t 20 --get-user-env --parsable --array=1-$ARRAY_NTASKS $ARRAY_JOBFILE)",
+                    sp_threads) + " -p \""+str(partition)+"\" -t 20 --get-user-env --parsable --array=1-$ARRAY_NTASKS $ARRAY_JOBFILE)",
                       file=f)
                 print("echo $CAL000", file=f)
             with open(work_dir + "jobs.tmp", 'w') as f:

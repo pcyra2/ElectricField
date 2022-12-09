@@ -16,6 +16,8 @@ import multiprocessing
 import pandas as pd
 from IPython.display import display, HTML
 import json
+import webbrowser
+from threading import Timer
 display(HTML(""))
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX])
@@ -626,4 +628,12 @@ def Visualise_Interp(n_clicks,alphval,interp,texture,draw_type,work_dir,radius,c
     else:
         return go.Figure(layout=go.Layout(title="Visualisation", uirevision='camera'))
 
-app.run_server(debug=True, use_reloader=False, host='0.0.0.0', )
+def Open_Browser():
+    webbrowser.open("0.0.0.0:8050")
+
+
+if __name__ == '__main__':
+    Timer(1, Open_Browser).start();
+    app.run_server(debug=True, use_reloader=False, host='0.0.0.0', )
+
+
