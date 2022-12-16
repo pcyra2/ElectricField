@@ -12,6 +12,7 @@ Ang2Bohr = 1.889725989
 Bohr2Ang = 0.529177249
 Amu2SiKg = 1.660539040e-27
 
+
 def init_modules():
     with open("servers.conf", "r") as file:
         data = file.readlines()
@@ -24,6 +25,7 @@ def init_modules():
              'scratch' : str(words[3]),
              'partition' : str(words[4])}})
     return modules
+
 
 modules = init_modules()
 
@@ -146,6 +148,7 @@ AtomColours = {"H" : ["rgba(255, 255, 255, 1.0)", 1],
                "I" : ["rgba(  0, 241,   0, 1.0)", 53],
                "Xe": ["rgba(251,  20, 145, 1.0)", 54]}
 
+
 SurfaceStyles = {'matte': {'ambient'             : 0.60,
                            'diffuse'             : 0.35,
                            'fresnel'             : 0.05,
@@ -175,6 +178,7 @@ SurfaceStyles = {'matte': {'ambient'             : 0.60,
                            'facenormalsepsilon'  : 1e-15,
                            'vertexnormalsepsilon': 1e-15}}
 
+
 def CoordGet(work_dir, file):
     with open(work_dir+file,'r') as f:
         data = f.readlines()
@@ -187,6 +191,7 @@ def CoordGet(work_dir, file):
             y.append(float(words[2]))
             z.append(float(words[3]))
     return (at, x, y, z)
+
 
 def CoordCheck(at,x,y,z,recenter,center_type,data):
     # print(x)
@@ -218,12 +223,14 @@ def CoordCheck(at,x,y,z,recenter,center_type,data):
                (x,y,z) = Recenter(x,y,z,data[0],data[1],data[2]) 
     return(x, y, z)
 
+
 def Recenter(x,y,z,cx,cy,cz):
     for i in range(len(x)):
         x[i] = x[i] - cx
         y[i] = y[i] - cy
         z[i] = z[i] - cz
     return(x,y,z)
+
 
 def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem01.nottingham.ac.uk",QMPACKAGE="QChem", wait_time=120):
     if server != "LOCAL":
@@ -310,11 +317,13 @@ def SPRun(work_dir, sp_memory, sp_threads, NumPoints, hostdir, server="loginchem
             run = subprocess.run(line, shell=True,env=my_env)
             print("Single Point Calculations Complete")
 
+
 def average(lst):
     if len(lst)==0:
         print("coordinates are not loaded, breaking")
         raise IndexError
     return sum(lst)/len(lst)
+
 
 def FormatCoord(at, x, y, z,work_dir,file="coords_formatted.txt"):
     newat = []
@@ -330,10 +339,12 @@ def FormatCoord(at, x, y, z,work_dir,file="coords_formatted.txt"):
         for i in range(len(at)):
             print(str(x[i])+"\t"+str(y[i])+"\t"+str(z[i])+"\t"+str(newat[i]),file=f)
 
+
 def sample_spherical(npoints):          ###Dont call (Script uses this not you)
     vec = numpy.random.randn(3, npoints)
     vec /= numpy.linalg.norm(vec, axis=0)
     return vec
+
 
 def RandomCoords(work_dir,num_points,sphere_radius,file="ChargeP.xyz"):
     phi = numpy.linspace(0, numpy.pi, 20)
@@ -354,6 +365,7 @@ def RandomCoords(work_dir,num_points,sphere_radius,file="ChargeP.xyz"):
     with open(str(work_dir)+file.replace("P","N"),'w') as f:
         for i in range(len(nxi)):
             print(str(nxi[i])+"\t"+str(nyi[i])+"\t"+str(nzi[i]),file=f)
+
 
 def GenSP(opt_sys_at, opt_sys_x, opt_sys_y, opt_sys_z, work_dir, point_charge_value, sp_memory,
           sp_threads, sp_method, sp_basis, sys_charge, sys_spin, Dispersion = "D3",QMPACKAGE  = "QChem", charge_file = "ChargeP.xyz"):       ##generates Single point input files
@@ -424,6 +436,7 @@ def GenSP(opt_sys_at, opt_sys_x, opt_sys_y, opt_sys_z, work_dir, point_charge_va
                 print(str(nc),file=f)
                 print("$end", file=f)
 
+
 def Submit(hostname,hostdir,workdir):
     print("syncing data")
     print("Hostname = "+ hostname + ", Workdir = "+ workdir+", Serverdir = "+hostdir)
@@ -445,6 +458,7 @@ def Submit(hostname,hostdir,workdir):
     # print(status)
     pid = status[3]
     print("job id = "+pid)
+
 
 def FinishCheck(hostname,hostdir,workdir,njobs,threads, wait_time):
     print("Waiting for calculations to be completed")
@@ -486,6 +500,7 @@ def FinishCheck(hostname,hostdir,workdir,njobs,threads, wait_time):
                 print("There are failed calculations, please run them manually or check the outputs.")
                 return ValueError
     print("Jobs completed")
+
 
 def OutputExtract(work_dir,num_points,sp_threads,QMPACKAGE  = "QChem"):
     with open(str(work_dir) + "ChargeP.xyz") as chargep:
@@ -551,6 +566,7 @@ def OutputExtract(work_dir,num_points,sp_threads,QMPACKAGE  = "QChem"):
             print(str(xyzc[j]),file=f)
     return fail_tot
 
+
 def EnergyExtract(work_dir, energies_filename):
     with open(work_dir + energies_filename,'r') as f:
         data = f.readlines()
@@ -563,12 +579,14 @@ def EnergyExtract(work_dir, energies_filename):
         C.append(float(words[3]))
     return (X,Y,Z,C)
 
+
 def SphereGen(x, y, z, radius, resolution=10):
     u, v = numpy.mgrid[0:2*numpy.pi:resolution*2j, 0:numpy.pi:resolution*1j]
     X = radius * numpy.cos(u)*numpy.sin(v) + x
     Y = radius * numpy.sin(u)*numpy.sin(v) + y
     Z = radius * numpy.cos(v) + z
     return (X, Y, Z)
+
 
 def GenColors(x_sphere, y_sphere, z_sphere,x_data, y_data, z_data, en_data,radius):
     ### Generate array for colors
@@ -607,6 +625,7 @@ def GenColors(x_sphere, y_sphere, z_sphere,x_data, y_data, z_data, en_data,radiu
     print("Coloring done")
     return (col,cX,cY,cZ,contVal)
 
+
 def GenColorsFaster(x_sphere, y_sphere, z_sphere,x_data, y_data, z_data, en_data,radius):
     ### Generate array for colors
     col = numpy.zeros([len(x_sphere[:,1]),len(x_sphere[1])])
@@ -627,12 +646,16 @@ def GenColorsFaster(x_sphere, y_sphere, z_sphere,x_data, y_data, z_data, en_data
             dy = (y_sphere[i, j] * radius) * numpy.asarray(y_data)
             dz = (z_sphere[i, j] * radius) * numpy.asarray(z_data)
             dP = numpy.arccos((dx + dy + dz) / (numpy.power(radius, 2))) * radius
-            dpE = numpy.exp(-numpy.power(dP,2))
+            dP = numpy.nan_to_num(dP)
+            # dpE = numpy.exp(-numpy.power(dP,2))
+            # dpE = numpy.exp(-dP) ## Linear exponential
+            dpE = numpy.exp(-numpy.power(dP,0.5)) ##Current Favourite
+            # dpE = -dP
             top = numpy.dot(dpE, numpy.asarray(en_data))
             bottom = numpy.sum(dpE)
             # print(top, bottom)
             cVal = round(top/bottom,4)
-            # print(cVal)
+            print(cVal)
             # for k in numpy.arange(round(numpy.min(en_data),3),round(numpy.max(en_data),3)-0.001):
             if cVal in iso_values:
                 cX.append(x_sphere[i,j] * radius)
@@ -643,6 +666,7 @@ def GenColorsFaster(x_sphere, y_sphere, z_sphere,x_data, y_data, z_data, en_data
             col[i,j] = top/bottom
     print("Coloring done")
     return (col,cX,cY,cZ,contVal)
+
 
 
 def GetRange(min_range, max_range, overage=2.5):
@@ -656,6 +680,7 @@ def GetRange(min_range, max_range, overage=2.5):
                                        'y': 2.2 / max_range,
                                        'z': 2.2 / max_range}}}
     return layout
+
 
 def GetLayout(figsize=None):
     axis = {'showgrid': False,
@@ -685,6 +710,7 @@ def GetLayout(figsize=None):
 
     return layout
 
+
 def Connectivity(molecule):
     T = []
     n = molecule.shape[0]
@@ -697,6 +723,7 @@ def Connectivity(molecule):
             if Rij != 0.0 and Rij < ithr:
                 T.append((i, j))
     return T
+
 
 def GetAtoms(geometry, atomic_numbers, symbols, style, surface,
            quality='high'):
@@ -717,6 +744,7 @@ def GetAtoms(geometry, atomic_numbers, symbols, style, surface,
         trace_list.append(
             GetAtomMesh(reshaped_sphere, symbols[atom], xyz, surface))
     return trace_list
+
 
 def GetBonds(geometry, symbols, bonds, style, surface, quality='high'):
     numpyts = {'low': 20, 'medium': 50, 'high': 100}
@@ -753,6 +781,7 @@ def GetBonds(geometry, symbols, bonds, style, surface, quality='high'):
             trace_list.append(mesh)
     return trace_list
 
+
 def GetAtomMesh(sphere, symbol, xyz, surface):
     mesh = go.Mesh3d({'x': sphere[0] + xyz[0],
                       'y': sphere[1] + xyz[1],
@@ -765,6 +794,7 @@ def GetAtomMesh(sphere, symbol, xyz, surface):
                       'lightposition': {'x': 100, 'y': 200, 'z': 0}})
     return mesh
 
+
 def GetBondMesh(cylinder, bond, symbols, surface):
     mesh = go.Mesh3d({'x': cylinder[:, 0],
                       'y': cylinder[:, 1],
@@ -776,6 +806,7 @@ def GetBondMesh(cylinder, bond, symbols, surface):
                       'lighting': SurfaceStyles[surface],
                       'lightposition': {'x': 100, 'y': 200, 'z': 0}})
     return mesh
+
 
 def Cylinder(r=1.0, n=100):
     phi = numpy.linspace(0, 2.0 * numpy.pi, n)
@@ -790,6 +821,7 @@ def Cylinder(r=1.0, n=100):
     pts[len(phi):, 2] = 1.0
     return pts
 
+
 def Sphere(r=1.0, n=20):
     phi = numpy.linspace(0, 2.0 * numpy.pi, 2 * n)
     theta = numpy.linspace(-0.5 * numpy.pi, 0.5 * numpy.pi, n)
@@ -799,6 +831,7 @@ def Sphere(r=1.0, n=20):
     pts[1] = r * (numpy.cos(theta) * numpy.cos(phi)).flatten()
     pts[2] = r * (numpy.sin(theta)).flatten()
     return pts
+
 
 def RotationMatrix(a, b):
     """
@@ -817,6 +850,7 @@ def RotationMatrix(a, b):
         R = numpy.identity(3) + K + numpy.dot(K, K) * (1.0 - d) / (s * s)
     return R
 
+
 def DrawMolecule(MolData,txture,style):
     Molecule = {}
     Molecule['geometry'] = MolData[:,:3].copy()
@@ -826,6 +860,7 @@ def DrawMolecule(MolData,txture,style):
     Molecule['bond_list'] = GetBonds(Molecule['geometry'],Molecule['symbols'],Molecule['bonds'],style,txture)
     Molecule['atom_list'] = GetAtoms(Molecule['geometry'],Molecule['atomic_numbers'],Molecule['symbols'],style,txture)
     return Molecule
+
 
 def RunClean(work_dir, SRV, SRV_dir):
     print("Cleaning "+str(work_dir)+"Excluding .xyz files")
@@ -841,6 +876,7 @@ def RunClean(work_dir, SRV, SRV_dir):
         print("Cleaning "+str(SRV_dir)+ " on "+str(SRV))
         srv = subprocess.run(['ssh', SRV, 'rm -r ', str(SRV_dir)], capture_output = True, text = True, check=True)
         srv = subprocess.run(['ssh', SRV, 'mkdir ', str(SRV_dir)], capture_output = True, text = True, check=True)
+
 
 def CompareEnergies(x_data, y_data, z_data, en_data1, en_data2, x_sphere, y_sphere, z_sphere, radius):
     delta = en_data2 - en_data1

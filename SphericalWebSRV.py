@@ -24,6 +24,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-p','--port', type=int, help = "The port number to run the web server.")
 parser.add_argument('-w', '--wait', type=int, help = "The length of time to wait between rsync commands whilst waiting to check for calculation completion")
+parser.add_argument('-t', '--testing', type=bool, help="Whether to print out interpolated color values as a list for comparison.")
 args = parser.parse_args()
 
 
@@ -414,7 +415,7 @@ def Calculate_Data(nclicks, work_dir, start_coordinate, qm_functional, qm_basis_
         else:
             wait_time = 120
         print(wait_time)
-        random=True ### For future implementation of systematic datapoints.
+        random=False ### For future implementation of systematic datapoints.
         if calculate_data == True:
             if run_clean == True:
                 Utils.RunClean(work_dir, server, host_work_dir)
@@ -427,13 +428,20 @@ def Calculate_Data(nclicks, work_dir, start_coordinate, qm_functional, qm_basis_
             else:  ### Generates non-random points about the sphere ###
                 print(
                     "Warning, this method is currently unsupported and probably doesnt work. DONT USE UNLESS YOU HAVE FIXED IT")
-                (px, py, pz) = Utils.SphereGen(0, 0, 0, radius, spherical_datapoints)
+                (px, py, pz) = Utils.SphereGen(0, 0, 0, radius, numpy.power(spherical_datapoints/2,0.5))
+                print(len(px[1]))
+                print(len(px[:,1]))
+                counter = 0
                 with open(str(work_dir) + "ChargeP.xyz", 'w') as f:
-                    for i in range(len(px)):
-                        print(str(px[i]) + "\t" + str(py[i]) + "\t" + str(pz[i]), file=f)
+                    for i in range(len(px[:, 1])):
+                        for j in range(len(px[1])):
+                            print(str(px[i, j]) + "\t" + str(py[i, j]) + "\t" + str(pz[i, j]), file=f)
+                            counter = counter + 1
                 with open(str(work_dir) + "ChargeN.xyz", 'w') as f:
-                    for i in range(len(px)):
-                        print( str(-px[i]) + "\t" + str(-py[i]) + "\t" + str(-pz[i]), file=f)
+                    for i in range(len(px[:, 1])):
+                        for j in range(len(px[1])):
+                            print( str(-px[i,j]) + "\t" + str(-py[i,j]) + "\t" + str(-pz[i,j]), file=f)
+                spherical_datapoints = counter
             Utils.GenSP(type_atom, x_atom, y_atom, z_atom, str(work_dir), charge_value,
                         mem, threads, str(qm_functional), str(qm_basis_set), system_charge,
                         system_spin, str(qm_dispersion), str(qm_package))
@@ -471,6 +479,11 @@ def Interpolate_Data(nclicks, work_dir, file, resolution, radius, save):
         (col_sphere, x_contour, y_contour, z_contour, val_contour) = Utils.GenColorsFaster(x_sphere, y_sphere, z_sphere, x_data, y_data, z_data, en_data, radius)
         color_end = time.perf_counter()
         print(f"Time taken to interpolate and generate color data is {color_end - colour_start} seconds")
+        if args.testing == True:
+            with open(str(work_dir)+"Testing.xyzc",'w') as file:
+                for i in range(len(x_sphere[:,1])):
+                    for j in range(len(x_sphere[1])):
+                        print(str(x_sphere[i,j]*radius)+"\t"+str(y_sphere[i,j]*radius)+"\t"+str(z_sphere[i,j]*radius)+"\t"+str(col_sphere[i,j]),file=file)
         if save == "True":
             data = {"x_sphere" : x_sphere.tolist(),
                     "y_sphere" : y_sphere.tolist(),
