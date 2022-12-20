@@ -627,7 +627,7 @@ def GenColorsFaster(x_sphere, y_sphere, z_sphere,x_data, y_data, z_data, en_data
             dy = (y_sphere[i, j] * radius) * numpy.asarray(y_data)
             dz = (z_sphere[i, j] * radius) * numpy.asarray(z_data)
             dP = numpy.arccos((dx + dy + dz) / (numpy.power(radius, 2))) * radius
-            dpE = numpy.exp(-numpy.power(dP,2))
+            dpE = numpy.exp(-numpy.power(dP,0.5))
             top = numpy.dot(dpE, numpy.asarray(en_data))
             bottom = numpy.sum(dpE)
             # print(top, bottom)
